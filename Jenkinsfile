@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-repo-url.git'
+                git 'https://github.com/orestisthebeast/mod4-k8s.git'
             }
         }
         stage('Deploy to Kubernetes') {
