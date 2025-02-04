@@ -1,44 +1,17 @@
-pipeline {
+pipeline{
     agent any
-    environment {
-        KUBECONFIG = credentials('k8s') // Assuming you have stored your kubeconfig as a Jenkins credential
-    }
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout your repository containing the Kubernetes manifests
-                git branch: 'main', url: 'https://github.com/orestisthebeast/mod4-k8s.git'
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Write the kubeconfig to a file
-                    writeFile file: 'kubeconfig', text: KUBECONFIG
-                    // Set the KUBECONFIG environment variable
-                    withEnv(["KUBECONFIG=${pwd()}/kubeconfig"]) {
-                        // Apply the Kubernetes manifest
-                        sh 'kubectl apply -f task1.yaml'
+        stages{
+            stage("k8s"){
+                steps{
+                    withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'cluster', contextName: '', credentialsId: 'k8s', namespace: 'default', serverUrl: 'https://494DC0F033B24CB1F89C165EB78571E3.sk1.eu-west-2.eks.amazonaws.com']]) 
+                    {
+                    sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+                    sh 'chmod u+x ./kubectl'
+                    sh './kubectl get nodes'
+                    sh './kubectl create -f pod.yaml'
+                    sh './kubectl get pods'
                     }
-                }
-            }
-        }
-        stage('Verify Deployment') {
-            steps {
-                script {
-                    // Verify that the deployment and service are running
-                    withEnv(["KUBECONFIG=${pwd()}/kubeconfig"]) {
-                        sh 'kubectl get deployments'
-                        sh 'kubectl get svc'
-                    }
-                }
-            }
-        }
-    }
-    post {
-        always {
-            // Clean up the kubeconfig file
-            deleteFile 'kubeconfig'
+                }    
         }
     }
 }
