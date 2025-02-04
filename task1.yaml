@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task1-deployment
+  labels:
+    app: task1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: task1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: task1
+    spec:
+      containers:
+      - name: task1
+        image: chrisreeves1/myapp
+        ports:
+        - containerPort: 5500
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task1
+spec:
+  type: LoadBalancer
+  selector:
+    app: task1
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5500
